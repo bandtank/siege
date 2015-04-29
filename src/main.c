@@ -102,13 +102,13 @@ display_version(BOOLEAN b)
   strncpy(name, program_name, strlen(program_name));
 
   if(my.debug){
-    fprintf(stderr,"%s %s: debugging enabled\n\n%s\n", uppercase(name, strlen(name)), version_string, copyright);
+    fprintf(stdout,"%s %s: debugging enabled\n\n%s\n", uppercase(name, strlen(name)), version_string, copyright);
   } else {
     if(b == TRUE){
-      fprintf(stderr,"%s %s\n\n%s\n", uppercase(name, strlen(name)), version_string, copyright);
+      fprintf(stdout,"%s %s\n\n%s\n", uppercase(name, strlen(name)), version_string, copyright);
       exit(EXIT_SUCCESS);
     } else {
-      fprintf(stderr,"%s %s\n", uppercase(name, strlen(name)), version_string);
+      fprintf(stdout,"%s %s\n", uppercase(name, strlen(name)), version_string);
     }
   }
 }  /* end of display version */
@@ -390,11 +390,7 @@ main(int argc, char *argv[])
    * output if necessary.
    */
   if (!my.get && !my.quiet) {
-    fprintf(stderr, "** "); 
-    display_version(FALSE);
-    fprintf(stderr, "** Preparing %d concurrent users for battle.\n", my.cusers);
-    fprintf(stderr, "The server is now under siege...");
-    if (my.verbose) { fprintf(stderr, "\n"); }
+    fprintf(stdout, "### BEGIN %d\n", my.cusers);
   }
 
   /**
@@ -479,9 +475,9 @@ main(int argc, char *argv[])
     result = crew_add(crew, (void*)start_routine, &(client[x]));
     if (result == FALSE) { 
       my.verbose = FALSE;
-      fprintf(stderr, "Unable to spawn additional threads; you may need to\n");
-      fprintf(stderr, "upgrade your libraries or tune your system in order\n"); 
-      fprintf(stderr, "to exceed %d users.\n", my.cusers);
+      fprintf(stdout, "Unable to spawn additional threads; you may need to\n");
+      fprintf(stdout, "upgrade your libraries or tune your system in order\n"); 
+      fprintf(stdout, "to exceed %d users.\n", my.cusers);
       NOTIFY(FATAL, "system resources exhausted"); 
     }
   } /* end of for pthread_create */
@@ -543,38 +539,31 @@ main(int argc, char *argv[])
    * this does NOT affect performance stats.
    */
   pthread_usleep_np(10000);
-  if (my.verbose)
-    fprintf(stderr, "done.\n");
-  else
-    fprintf(stderr, "\b      done.\n");
+
 
   /**
    * prepare and print statistics.
    */
   if (my.failures > 0 && my.failed >= my.failures) {
-    fprintf(stderr, "%s aborted due to excessive socket failure; you\n", program_name);
-    fprintf(stderr, "can change the failure threshold in $HOME/.%src\n", program_name);
+    fprintf(stdout, "%s aborted due to excessive socket failure; you\n", program_name);
+    fprintf(stdout, "can change the failure threshold in $HOME/.%src\n", program_name);
   }
-  fprintf(stderr, "\nTransactions:\t\t%12u hits\n",        data_get_count(D));
-  fprintf(stderr, "Availability:\t\t%12.2f %%\n",          data_get_count(D)==0 ? 0 :
-                                                           (double)data_get_count(D) /
-                                                           (data_get_count(D)+my.failed)
-                                                           *100
-  );
-  fprintf(stderr, "Elapsed time:\t\t%12.2f secs\n",        data_get_elapsed(D));
-  fprintf(stderr, "Data transferred:\t%12.2f MB\n",        data_get_megabytes(D)); /*%12llu*/
-  fprintf(stderr, "Response time:\t\t%12.2f secs\n",       data_get_response_time(D));
-  fprintf(stderr, "Transaction rate:\t%12.2f trans/sec\n", data_get_transaction_rate(D));
-  fprintf(stderr, "Throughput:\t\t%12.2f MB/sec\n",        data_get_throughput(D));
-  fprintf(stderr, "Concurrency:\t\t%12.2f\n",              data_get_concurrency(D));
-  fprintf(stderr, "Successful transactions:%12u\n",        data_get_code(D)); 
-  if (my.debug) {
-    fprintf(stderr, "HTTP OK received:\t%12u\n",             data_get_ok200(D));
-  }
-  fprintf(stderr, "Failed transactions:\t%12u\n",          my.failed);
-  fprintf(stderr, "Longest transaction:\t%12.2f\n",        data_get_highest(D));
-  fprintf(stderr, "Shortest transaction:\t%12.2f\n",       data_get_lowest(D));
-  fprintf(stderr, " \n");
+  fprintf(stdout, "## STATS ");
+  fprintf(stdout, "Transactions:%u",        data_get_count(D));
+  fprintf(stdout, ",Availability:%.2f",               data_get_count(D)==0 ? 0 : (double)data_get_count(D) / (data_get_count(D)+my.failed) *100);
+  fprintf(stdout, ",Elapsed time:t%.2f",        data_get_elapsed(D));
+  fprintf(stdout, ",Data transferred:%.2f",        data_get_megabytes(D)); /*%12llu*/
+  fprintf(stdout, ",Response time:%.2f",       data_get_response_time(D));
+  fprintf(stdout, ",Transaction rate:%.2f", data_get_transaction_rate(D));
+  fprintf(stdout, ",Throughput:%.2f",        data_get_throughput(D));
+  fprintf(stdout, ",Concurrency:%.2f",              data_get_concurrency(D));
+  fprintf(stdout, ",Successful transactions:%u",        data_get_code(D)); 
+  fprintf(stdout, ",HTTP OK received:%u",             data_get_ok200(D));
+  fprintf(stdout, ",Failed transactions:%u",          my.failed);
+  fprintf(stdout, ",Longest transaction:%.2f",        data_get_highest(D));
+  fprintf(stdout, ",Shortest transaction:%.2f\n",       data_get_lowest(D));
+  fprintf(stdout, "### END_TEST\n");
+
   if(my.mark)    mark_log_file(my.markstr);
   if(my.logging) log_transaction(D);
 

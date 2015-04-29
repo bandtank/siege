@@ -188,7 +188,7 @@ auth_get_digest_header(AUTH this, SCHEME scheme, DCHLG *chlg, DCRED *cred, const
     cnonce = xstrcat(", cnonce=\"", cred->cnonce_value, "\"", NULL);
 
     if (NULL == (h_a1 = __get_h_a1(chlg, cred, chlg->nonce))) {
-      fprintf(stderr, "error calling __get_h_a1\n");
+      fprintf(stdout, "error calling __get_h_a1\n");
       return NULL;
     }
 
@@ -203,7 +203,7 @@ auth_get_digest_header(AUTH this, SCHEME scheme, DCHLG *chlg, DCRED *cred, const
       xfree(tmp);
       response = xstrcat(", response=\"", request_digest, "\"", NULL);
     } else {
-      fprintf(stderr, "error quality of protection not supported: %s\n", chlg->qop);
+      fprintf(stdout, "error quality of protection not supported: %s\n", chlg->qop);
       return NULL;
     }
   } else {
@@ -497,7 +497,7 @@ __digest_challenge(const char *challenge)
   for (beg = end = challenge; !isspace(*end) && *end; ++end);
 
   if (strncasecmp("Digest", beg, end - beg)) {
-    fprintf(stderr, "no Digest keyword in challenge [%s]\n", challenge);
+    fprintf(stdout, "no Digest keyword in challenge [%s]\n", challenge);
     return NULL;
   }
 
@@ -588,7 +588,7 @@ __digest_challenge(const char *challenge)
       result->qop = val;
       break;
       default:
-      fprintf(stderr, "unknown key [%s]\n", key);
+      fprintf(stdout, "unknown key [%s]\n", key);
       xfree(val);
       break;
     }
@@ -650,7 +650,7 @@ __get_h_a1(const DCHLG *chlg, DCRED *cred, const char *nonce_value)
     }
   }
   else {
-    fprintf(stderr, "invalid call to %s algorithm is [%s]\n", __FUNCTION__, chlg->algorithm);
+    fprintf(stdout, "invalid call to %s algorithm is [%s]\n", __FUNCTION__, chlg->algorithm);
     return NULL;
   }
 

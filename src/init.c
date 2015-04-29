@@ -93,10 +93,10 @@ init_config( void )
     NOTIFY(FATAL, "unable to initiate condition");
 
   if (load_conf(my.rc) < 0) {
-    fprintf( stderr, "****************************************************\n" );
-    fprintf( stderr, "siege: could not open %s\n", my.rc );
-    fprintf( stderr, "run \'siege.config\' to generate a new .siegerc file\n" );
-    fprintf( stderr, "****************************************************\n" );
+    fprintf( stdout, "****************************************************\n" );
+    fprintf( stdout, "siege: could not open %s\n", my.rc );
+    fprintf( stdout, "run \'siege.config\' to generate a new .siegerc file\n" );
+    fprintf( stdout, "****************************************************\n" );
     return -1;
   }
   
@@ -555,7 +555,7 @@ ds_module_check(void)
 
   if (my.secs > 0 && ((my.reps > 0) && (my.reps != MAXREPS))) {
     NOTIFY(ERROR, "CONFIG conflict: selected time and repetition based testing" );
-    fprintf( stderr, "defaulting to time-based testing: %d seconds\n", my.secs );
+    fprintf( stdout, "defaulting to time-based testing: %d seconds\n", my.secs );
     my.reps = MAXREPS;
   }
 

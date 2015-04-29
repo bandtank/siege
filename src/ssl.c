@@ -166,7 +166,7 @@ SSL_thread_setup( void )
 #if defined(THREADS) || defined(OPENSSL_THREADS)
 #else
    fprintf(
-    stderr, 
+    stdout, 
     "WARNING: your openssl libraries were compiled without thread support\n"
    );
    pthread_sleep_np( 2 );
@@ -213,7 +213,7 @@ SSL_pthreads_locking_callback(int mode, int type, char *file, int line)
 {
   if( my.debug == 4 ){
     fprintf(
-      stderr,"thread=%4d mode=%s lock=%s %s:%d\n", (int)CRYPTO_thread_id(),
+      stdout,"thread=%4d mode=%s lock=%s %s:%d\n", (int)CRYPTO_thread_id(),
       (mode&CRYPTO_LOCK)?"l":"u", (type&CRYPTO_READ)?"r":"w",file,line
     );
   }

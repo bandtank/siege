@@ -422,7 +422,7 @@ __http(CONN *C, URL U, CLIENT *client)
           auth_set_basic_header(my.auth, HTTP, head->auth.realm.www);
         }
         if ((__request(C, U, client)) == FALSE) {
-          fprintf(stderr, "ERROR from http_request\n");
+          fprintf(stdout, "ERROR from http_request\n");
           return FALSE;
         }
       }

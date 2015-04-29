@@ -1,0 +1,7 @@
+*.o
+tags
+*.la
+*.lo
+*.a
+config.log
+

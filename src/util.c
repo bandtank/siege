@@ -296,7 +296,7 @@ urandom()
   if ((fd = open("/dev/urandom", O_RDONLY)) >= 0) {
     len = read(fd, &rand, sizeof(rand));
     if (len == -1) {
-      fprintf(stderr, "ERROR: failed to open /dev/urandom\n"); 
+      fprintf(stdout, "ERROR: failed to open /dev/urandom\n"); 
     }
     close(fd);
   }

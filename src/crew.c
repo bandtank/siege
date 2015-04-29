@@ -219,17 +219,9 @@ crew_join(CREW crew, BOOLEAN finish, void **payload)
 {
   int    x; 
   int    c;
+  if((c = pthread_mutex_lock(&(crew->lock))) != 0){ NOTIFY(FATAL, "pthread lock"); }
 
-  if((c = pthread_mutex_lock(&(crew->lock))) != 0){
-    NOTIFY(FATAL, "pthread lock");
-  }
-
-  if(crew->closed || crew->shutdown){
-    if((c = pthread_mutex_unlock(&(crew->lock))) != 0){
-      NOTIFY(FATAL, "pthread unlock");
-    }
-    return FALSE;
-  }
+  if(crew->closed || crew->shutdown){ if((c = pthread_mutex_unlock(&(crew->lock))) != 0){ NOTIFY(FATAL, "pthread unlock"); } return FALSE; }
   
   crew->closed = TRUE;
 
@@ -240,34 +232,23 @@ crew_join(CREW crew, BOOLEAN finish, void **payload)
       struct timeval tp;
 
       rc = gettimeofday(&tp,NULL);
-      if( rc != 0 )
-        perror("gettimeofday");
+      if( rc != 0 ) perror("gettimeofday");
       ts.tv_sec = tp.tv_sec+60;
       ts.tv_nsec = tp.tv_usec*1000;
       rc = pthread_cond_timedwait(&(crew->empty), &(crew->lock), &ts );
-      if(rc==ETIMEDOUT) {
-        pthread_mutex_unlock(&crew->lock);
-      }
+      if(rc==ETIMEDOUT) { pthread_mutex_unlock(&crew->lock); }
 
-      if( rc != 0){
-	NOTIFY(FATAL, "pthread wait");
-      }
+      if( rc != 0){ NOTIFY(FATAL, "pthread wait"); }
     }
   }
 
   crew->shutdown = TRUE;
 
-  if((c = pthread_mutex_unlock(&(crew->lock))) != 0){
-    NOTIFY(FATAL, "pthread_mutex_unlock");
-  }
+  if((c = pthread_mutex_unlock(&(crew->lock))) != 0){ NOTIFY(FATAL, "pthread_mutex_unlock"); }
 
-  if((c = pthread_cond_broadcast(&(crew->not_empty))) != 0){
-    NOTIFY(FATAL, "pthread broadcast");
-  }
+  if((c = pthread_cond_broadcast(&(crew->not_empty))) != 0){ NOTIFY(FATAL, "pthread broadcast"); }
   
-  if((c = pthread_cond_broadcast(&(crew->not_full))) != 0){
-    NOTIFY(FATAL, "pthread broadcast");
-  }
+  if((c = pthread_cond_broadcast(&(crew->not_full))) != 0){ NOTIFY(FATAL, "pthread broadcast"); }
 
   for(x = 0; x < crew->size; x++){
     if((c = pthread_join(crew->threads[x], payload)) != 0){

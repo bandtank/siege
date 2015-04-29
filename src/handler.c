@@ -45,10 +45,10 @@ spin_doctor(CREW crew)
   }
 
   for(x = 0; crew_get_total(crew) > 1 || x < 55; x++){
-    fflush(stderr);
-    fprintf(stderr,"%c", h[x%4]);
+    fflush(stdout);
+    fprintf(stdout,"%c", h[x%4]);
     pthread_usleep_np(20000);
-    fprintf(stderr, "\b"); 
+    fprintf(stdout, "\b"); 
   }
   return;
 }
@@ -75,7 +75,6 @@ sig_handler(CREW crew)
    */
   sigwait(&sigs, &gotsig);
   my.verbose = FALSE;
-  fprintf(stderr, "\nLifting the server siege..."); 
 //  crew_set_shutdown(crew, TRUE);
   crew_cancel(crew);
 

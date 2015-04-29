@@ -218,7 +218,7 @@ new_socket(CONN *C, const char *hostparam, int portparam)
     res = select(C->sock+1, &rs, &ws, NULL, &timeout);
     if ((res == -1) && (errno == EINTR)) {
       pthread_testcancel();
-      fprintf(stderr, "socket: connection timed out\n");
+      fprintf(stdout, "socket: connection timed out\n");
       socket_close(C);
       return -1; 
     } else { 
