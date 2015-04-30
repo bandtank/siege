@@ -45,10 +45,7 @@ spin_doctor(CREW crew)
   }
 
   for(x = 0; crew_get_total(crew) > 1 || x < 55; x++){
-    fflush(stdout);
-    fprintf(stdout,"%c", h[x%4]);
     pthread_usleep_np(20000);
-    fprintf(stdout, "\b"); 
   }
   return;
 }

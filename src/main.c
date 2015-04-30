@@ -549,19 +549,19 @@ main(int argc, char *argv[])
     fprintf(stdout, "can change the failure threshold in $HOME/.%src\n", program_name);
   }
   fprintf(stdout, "## STATS ");
-  fprintf(stdout, "Transactions:%u",        data_get_count(D));
-  fprintf(stdout, ",Availability:%.2f",               data_get_count(D)==0 ? 0 : (double)data_get_count(D) / (data_get_count(D)+my.failed) *100);
-  fprintf(stdout, ",Elapsed time:t%.2f",        data_get_elapsed(D));
-  fprintf(stdout, ",Data transferred:%.2f",        data_get_megabytes(D)); /*%12llu*/
-  fprintf(stdout, ",Response time:%.2f",       data_get_response_time(D));
-  fprintf(stdout, ",Transaction rate:%.2f", data_get_transaction_rate(D));
-  fprintf(stdout, ",Throughput:%.2f",        data_get_throughput(D));
-  fprintf(stdout, ",Concurrency:%.2f",              data_get_concurrency(D));
-  fprintf(stdout, ",Successful transactions:%u",        data_get_code(D)); 
-  fprintf(stdout, ",HTTP OK received:%u",             data_get_ok200(D));
-  fprintf(stdout, ",Failed transactions:%u",          my.failed);
-  fprintf(stdout, ",Longest transaction:%.2f",        data_get_highest(D));
-  fprintf(stdout, ",Shortest transaction:%.2f\n",       data_get_lowest(D));
+  fprintf(stdout, "%u",        data_get_count(D));
+  fprintf(stdout, ",%.2f",               data_get_count(D)==0 ? 0 : (double)data_get_count(D) / (data_get_count(D)+my.failed) *100);
+  fprintf(stdout, ",%.2f",        data_get_elapsed(D));
+  fprintf(stdout, ",%.2f",        data_get_megabytes(D)); /*%12llu*/
+  fprintf(stdout, ",%.2f",       data_get_response_time(D));
+  fprintf(stdout, ",%.2f", data_get_transaction_rate(D));
+  fprintf(stdout, ",%.2f",        data_get_throughput(D));
+  fprintf(stdout, ",%.2f",              data_get_concurrency(D));
+  fprintf(stdout, ",%u",        data_get_code(D)); 
+  fprintf(stdout, ",%u",             data_get_ok200(D));
+  fprintf(stdout, ",%u",          my.failed);
+  fprintf(stdout, ",%.2f",        data_get_highest(D));
+  fprintf(stdout, ",%.2f\n",       data_get_lowest(D));
   fprintf(stdout, "### END_TEST\n");
 
   if(my.mark)    mark_log_file(my.markstr);
