@@ -156,7 +156,8 @@ __display(int color, const char *fmt, va_list ap)
   char   msg[BUFSIZE+1024];
 
   vsprintf(buf, fmt, ap);
-  snprintf(msg, sizeof msg, "%c[%d;%dm%s%c[%dm\n", 0x1B, RESET, color+30, buf, 0x1B, RESET);
+  snprintf(msg, sizeof msg, "%s\n", buf);
+  //snprintf(msg, sizeof msg, "%c[%d;%dm%s%c[%dm\n", 0x1B, RESET, color+30, buf, 0x1B, RESET);
   fprintf(stdout,"%s", msg);
   return;
 }
