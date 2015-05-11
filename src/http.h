@@ -49,9 +49,14 @@
 typedef 
 struct headers
 {
-  char                head[64];                /* http response         */
+  char                head[500];                /* http response         */
   int                 code;                    /* http return code      */
   unsigned long int   length;
+
+  float               response_time;
+  char                *host;
+  char                *pid;
+
   char                cookie[MAX_COOKIE_SIZE]; /* set-cookie data       */
   char                *redirect;               /* redirection URL       */
   struct{

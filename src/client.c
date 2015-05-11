@@ -336,9 +336,9 @@ __http(CONN *C, URL U, CLIENT *client)
         etime, bytes, url_get_display(U), url_get_ID(U), fmtime
       );
       else
-        DISPLAY(color, "%s%s%s%s,%d,%6.2f,%7lu,%s,%d,%s",
+        DISPLAY(color, "%s%s%s%s,%d,%6.2f,%7lu,%s,%d,%s,%s,%s,%f",
           time_str, (my.mark)?my.markstr:"", (my.mark)?",":"", head->head, head->code, 
-          etime, bytes, url_get_display(U), url_get_ID(U), fmtime
+          etime, bytes, url_get_display(U), url_get_ID(U), fmtime, head->host, head->pid, head->response_time
         );
     } else {
       if (my.display)
@@ -349,9 +349,9 @@ __http(CONN *C, URL U, CLIENT *client)
         ); 
       else
         DISPLAY ( 
-          color, "%s%s %d %6.2f secs: %7lu bytes ==> %-4s %s", 
+          color, "%s%s %d %6.2f secs: %7lu bytes ==> %-4s %s %s %s %f", 
           time_str, head->head, head->code, etime, bytes, url_get_method_name(U), 
-		  url_get_display(U)
+		  url_get_display(U), head->host, head->pid, head->response_time
         );
     } /* else not my.csv */
     if (my.timestamp) xfree(time_str);

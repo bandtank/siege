@@ -603,7 +603,16 @@ http_read_headers(CONN *C, URL U)
     if (strncasecmp(line, "cache-control: ", 15) == 0) {
       /* printf("%s\n", line+15); */
     }
-    if (n <=  0) { 
+    if (strncasecmp(line, "X-Server-Hostname: ", 19) == 0) {
+      h->host = xstrdup(__dequote(line+19));
+    }
+    if (strncasecmp(line, "X-Server-Pid: ", 14) == 0) {
+      h->pid = xstrdup(__dequote(line+14));
+    }
+    if (strncasecmp(line, "X-Runtime: ", 11) == 0) {
+      h->response_time = atof(line+11);
+    }
+    if (n <=  0) {
       echo ("read error: %s:%d", __FILE__, __LINE__);
       http_free_headers(h);
       return(NULL); 
