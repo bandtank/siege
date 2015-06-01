@@ -130,6 +130,18 @@ typedef struct
     size_t   size;     /* FTP file size */
     BOOLEAN  pasv;
   } ftp;
+  struct {
+    float init;
+    float conn;
+    float get_socket;
+    float get_proxy;
+    float https_tunnel;
+    float ssl;
+
+    float write;
+    float read_headers;
+    float read_payload;
+  } times;
 } CONN; 
 
 int       new_socket     (CONN *conn, const char *hostname, int port);

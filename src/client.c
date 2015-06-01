@@ -207,8 +207,19 @@ __http(CONN *C, URL U, CLIENT *client)
   unsigned long bytes  = 0;
   int      code, fail;  
   float    etime; 
-  clock_t  start, stop;
-  struct   tms t_start, t_stop; 
+
+  clock_t  start,
+           stop,
+           stop_init,
+           stop_pre_read,
+           stop_pre_read_headers;
+
+  struct   tms t_start,
+               t_stop,
+               t_stop_init,
+               t_stop_pre_read, 
+               t_stop_pre_read_headers; 
+  
   HEADERS  *head; 
 #ifdef  HAVE_LOCALTIME_R
   struct   tm keepsake;
@@ -258,8 +269,11 @@ __http(CONN *C, URL U, CLIENT *client)
   /* record transaction start time */
   start = times(&t_start);  
 
+
   if (! __init_connection(C, U, client)) return FALSE;
   
+  stop_init = times(&t_stop_init);
+
   /**
    * write to socket with a GET/POST/PUT/DELETE/HEAD
    */
@@ -277,6 +291,8 @@ __http(CONN *C, URL U, CLIENT *client)
     }
   } 
 
+  stop_pre_read_headers = times(&t_stop_pre_read_headers);
+
   /**
    * read from socket and collect statistics.
    */
@@ -287,6 +303,7 @@ __http(CONN *C, URL U, CLIENT *client)
     return FALSE; 
   } 
 
+  stop_pre_read = times(&t_stop_pre_read);
   bytes = http_read(C); 
 
   if (!my.zero_ok && (bytes < 1)) { 
@@ -300,6 +317,12 @@ __http(CONN *C, URL U, CLIENT *client)
   etime    =  elapsed_time(stop - start);  
   code     =  (head->code <  400 || head->code == 401 || head->code == 407) ? 1 : 0;
   fail     =  (head->code >= 400 && head->code != 401 && head->code != 407) ? 1 : 0; 
+
+  C->times.init = elapsed_time(stop_init - start);
+  C->times.write = elapsed_time(stop_pre_read_headers - stop_init);
+  C->times.read_headers = elapsed_time(stop_pre_read - stop_pre_read_headers);
+  C->times.read_payload = elapsed_time(stop - stop_pre_read);
+
   /**
    * quantify the statistics for this client.
    */
@@ -335,11 +358,15 @@ __http(CONN *C, URL U, CLIENT *client)
         time_str, (my.mark)?my.markstr:"", (my.mark)?",":"", client->id, head->head, head->code, 
         etime, bytes, url_get_display(U), url_get_ID(U), fmtime
       );
-      else
-        DISPLAY(color, "%s%s%s%s,%d,%6.2f,%7lu,%s,%d,%s,%s,%s,%f",
+      else {
+        //CCB IS USING THIS ONE
+        DISPLAY(color, "%s%s%s%s,%d,%6.2f,%7lu,%s,%d,%s,%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
           time_str, (my.mark)?my.markstr:"", (my.mark)?",":"", head->head, head->code, 
-          etime, bytes, url_get_display(U), url_get_ID(U), fmtime, head->host, head->pid, head->response_time
+          etime, bytes, url_get_display(U), url_get_ID(U), fmtime, head->host, head->pid, head->response_time,
+          C->times.init,C->times.write,C->times.read_headers,C->times.read_payload,
+          C->times.ssl,C->times.conn,C->times.get_proxy,C->times.get_socket,C->times.https_tunnel
         );
+      }
     } else {
       if (my.display)
         DISPLAY(
@@ -645,13 +672,19 @@ __init_connection(CONN *C, URL U, CLIENT *client)
   C->auth.type.proxy      = client->auth.type.proxy;
   memset(C->buffer, 0, sizeof(C->buffer));
 
+    clock_t start, stop;
+    struct   tms t_start, t_stop; 
+    start = times(&t_start); 
   debug (
     "%s:%d attempting connection to %s:%d",
     __FILE__, __LINE__,
     (auth_get_proxy_required(my.auth))?auth_get_proxy_host(my.auth):url_get_hostname(U),
     (auth_get_proxy_required(my.auth))?auth_get_proxy_port(my.auth):url_get_port(U)
   );
+    stop = times(&t_stop);
+    C->times.conn = elapsed_time(stop - start);
 
+    start = times(&t_start); 
   if (!C->connection.reuse || C->connection.status == 0) {
     if (auth_get_proxy_required(my.auth)) {
       debug (
@@ -680,6 +713,9 @@ __init_connection(CONN *C, URL U, CLIENT *client)
     return FALSE;
   }
 
+    stop = times(&t_stop);
+    C->times.get_socket = elapsed_time(stop - start);
+    start = times(&t_start); 
   debug (
     "%s:%d good socket connection:  %s:%d",
     __FILE__, __LINE__,
@@ -687,15 +723,24 @@ __init_connection(CONN *C, URL U, CLIENT *client)
     (auth_get_proxy_required(my.auth))?auth_get_proxy_port(my.auth):url_get_port(U)
   );
 
+    stop = times(&t_stop);
+    C->times.get_proxy = elapsed_time(stop - start);
+    start = times(&t_start); 
   if (C->encrypt == TRUE) {
     if (auth_get_proxy_required(my.auth)) {
       https_tunnel_request(C, url_get_hostname(U), url_get_port(U));
       https_tunnel_response(C);
     }
     C->encrypt = TRUE;
+
+    stop = times(&t_stop);
+    C->times.https_tunnel = elapsed_time(stop - start);
+    start = times(&t_start); 
     if (SSL_initialize(C)==FALSE) {
       return FALSE;
     }
+    stop = times(&t_stop); 
+    C->times.ssl =  elapsed_time(stop - start);  
   }
   return TRUE;
 }
